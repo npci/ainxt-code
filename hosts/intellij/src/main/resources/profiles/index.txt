@@ -1,0 +1,10 @@
+# One `*.ainxtprofile.json` filename per line, relative to this directory.
+#
+# An index is used rather than scanning, because enumerating a directory inside a
+# packaged plugin jar is not portable. Blank lines and `#` comments are ignored.
+#
+# Add your own deployment profile by dropping the file in this directory and
+# adding its name below. No code change is needed, and the settings UI builds its
+# profile list from whatever this file names.
+standalone.ainxtprofile.json
+oss.ainxtprofile.json

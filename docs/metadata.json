@@ -1,0 +1,52 @@
+{
+    "generation_info": {
+        "timestamp": "2026-08-18T22:34:04.406434",
+        "main_model": "kimi-k2.7-code",
+        "generator_version": "1.0.1",
+        "repo_path": "D:\\AiNxt\\ainxt-ide-plugin-develop",
+        "commit_id": ""
+    },
+    "statistics": {
+        "total_components": 356,
+        "leaf_nodes": 267,
+        "max_depth": 2
+    },
+    "files_generated": [
+        "overview.md",
+        "module_tree.json",
+        "first_module_tree.json",
+        "agent_management.md",
+        "agent_management_acp_client.md",
+        "agent_management_agent_lifecycle.md",
+        "agent_management_checkpoints.md",
+        "chat_webview.md",
+        "chat_webview_bridges.md",
+        "chat_webview_provider.md",
+        "config.md",
+        "extension_activation.md",
+        "extension_ui.md",
+        "handlers.md",
+        "handlers_file_system.md",
+        "handlers_permission.md",
+        "handlers_session_update.md",
+        "handlers_terminal.md",
+        "intellij_host.md",
+        "session_management.md",
+        "session_management_connections.md",
+        "session_management_history.md",
+        "session_management_orchestration.md",
+        "session_tree.md",
+        "status_bar.md",
+        "utils.md",
+        "utils_logging.md",
+        "utils_streaming.md",
+        "utils_telemetry.md",
+        "vscode_acp.md",
+        "vscode_host.md",
+        "webview_ui.md",
+        "webview_ui_app.md",
+        "webview_ui_bridge.md",
+        "webview_ui_build.md",
+        "webview_ui_markdown.md"
+    ]
+}

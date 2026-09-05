@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ainxt-code</title>
+    <!-- Clickjacking defence (modern browsers): disallow this page from being
+         embedded in any frame or iframe (equivalent to X-Frame-Options: DENY).
+         Legacy-browser framebusting script below covers older user-agents. -->
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'none'">
+    <!-- Framebusting script: legacy-browser clickjacking defence (CWE-1021).
+         Uses the canonical `top !== self` idiom so pattern-based scanners
+         recognise it as a framebusting guard. The destination is the hardcoded
+         relative path './' — a compile-time constant — so no runtime URL value
+         flows from a taint source into the location sink, preventing both the
+         Open Redirect (CWE-601) and DOM XSS (CWE-79) findings that arise when
+         window.location is read and forwarded. -->
+    <script>
+        if (top !== self) {
+            top.location.replace('./');
+        }
+    </script>
+    <!--
+        Client Hardcoded Domain (Checkmarx). Rather than loading mermaid/marked
+        from a remote CDN, both libraries are vendored alongside this page
+        (docs/mermaid.min.js, docs/marked.min.js) and loaded via a relative
+        path. This removes the hardcoded external domain entirely, so there
+        is no reliance on a third-party host at runtime and no supply-chain
+        exposure if that host were ever compromised. When bumping either
+        library's version, replace the corresponding vendored file with the
+        new release.
+    -->
+    <script src="mermaid.min.js"></script>
+    <script src="marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #f1f5f9;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --hover-color: #f8fafc;
+            --code-bg: #f8fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #ffffff;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 320px;
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+        }
+        
+        .content {
+            flex: 1;
+            margin-left: 320px;
+            padding: 40px 60px;
+            max-width: calc(100% - 320px);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .repo-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .repo-link:hover {
+            background: var(--hover-color);
+            border-color: var(--primary-color);
+        }
+        
+        .repo-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .repo-info h4 {
+            margin: 0 0 10px 0;
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .info-row {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+        
+        .info-row strong {
+            font-weight: 600;
+            min-width: 80px;
+            display: inline-block;
+        }
+        
+        .nav-section {
+            margin-bottom: 20px;
+        }
+        
+        .nav-section h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+        }
+        
+        .nav-item {
+            display: block;
+            padding: 10px 12px;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            background-color: white;
+            color: var(--primary-color);
+        }
+        
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-subsection {
+            margin-left: 15px;
+            margin-top: 5px;
+        }
+        
+        .nav-subsection .nav-item {
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+        
+        .nav-subsection .nav-subsection {
+            margin-left: 20px;
+        }
+        
+        .nav-subsection .nav-subsection .nav-item {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+        
+        .markdown-content {
+            max-width: 100%;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .markdown-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .markdown-content h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .markdown-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #475569;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .markdown-content h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #475569;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .markdown-content p {
+            margin-bottom: 1rem;
+            color: #475569;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .markdown-content li {
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+        
+        .markdown-content code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #e11d48;
+        }
+        
+        .markdown-content pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+            color: var(--text-color);
+            font-size: 0.875rem;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #64748b;
+            background: var(--hover-color);
+            padding: 1rem 1rem 1rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .markdown-content th, .markdown-content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .markdown-content th {
+            background-color: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .markdown-content tr:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .markdown-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .markdown-content a:hover {
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .markdown-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .mermaid {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            color: #64748b;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--secondary-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            padding: 2rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            color: #991b1b;
+            margin: 2rem 0;
+        }
+        
+        .error h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 20px;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            
+            <div class="logo">📚 ainxt-code</div>
+            
+            <div class="repo-info" id="repo-info" style="display: block;">
+                <h4>Generation Info</h4>
+                <div id="info-content"><div class="info-row"><strong>Model:</strong> kimi-k2.7-code</div>
+                <div class="info-row"><strong>Generated:</strong> 2026-08-18</div>
+                <div class="info-row"><strong>Components:</strong> 356</div>
+                <div class="info-row"><strong>Max Depth:</strong> 2</div></div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-item active" data-file="overview.md">
+                    📄 Overview
+                </div>
+            </div>
+            
+            <div id="navigation"></div>
+        </nav>
+        
+        <main class="content">
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading documentation...</p>
+            </div>
+            
+            <div id="content" class="markdown-content" style="display: none;"></div>
+        </main>
+    </div>
+    
+    <script>
+        // Embedded configuration
+        const CONFIG = {};
+        const MODULE_TREE = {
+  "intellij_host": {
+    "path": "hosts/intellij",
+    "components": [
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\AcpClient.kt::AcpClient",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\AinxtSettings.kt::AinxtSecrets",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\AinxtSettings.kt::AinxtSettings",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\AinxtToolWindowFactory.kt::Bridge",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\AinxtToolWindowFactory.kt::AinxtToolWindowFactory",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\WebviewScheme.kt::WebviewScheme",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\WebviewScheme.kt::ResourceHandler",
+      "hosts\\intellij\\src\\main\\kotlin\\dev\\ainxt\\ide\\WebviewScheme.kt::Factory"
+    ],
+    "children": {}
+  },
+  "vscode_acp": {
+    "path": "vscode-acp",
+    "components": [
+      "vscode-acp\\src\\config\\AgentConfig.ts::getAgentNames",
+      "vscode-acp\\src\\config\\AgentConfig.ts::AgentConfigEntry",
+      "vscode-acp\\src\\config\\AgentConfig.ts::setInjectedApiKey",
+      "vscode-acp\\src\\config\\AgentConfig.ts::getAgentConfig",
+      "vscode-acp\\src\\config\\AgentConfig.ts::withModelArg",
+      "vscode-acp\\src\\config\\AgentConfig.ts::getAgentConfigs",
+      "vscode-acp\\src\\config\\RegistryClient.ts::RegistryAgent",
+      "vscode-acp\\src\\config\\RegistryClient.ts::clearRegistryCache",
+      "vscode-acp\\src\\config\\RegistryClient.ts::Registry",
+      "vscode-acp\\src\\config\\RegistryClient.ts::fetchRegistry",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.writeTextFile",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.extMethod",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.terminalOutput",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.readTextFile",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.extNotification",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.getAgent",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.killTerminal",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.waitForTerminalExit",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.createTerminal",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.releaseTerminal",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.sessionUpdate",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.setAgent",
+      "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.requestPermission",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.killAll",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.killAgent",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.getAgent",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.spawnAgent",
+      "vscode-acp\\src\\core\\AgentManager.ts::shellEscape",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.getRunningAgents",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentInstance",
+      "vscode-acp\\src\\core\\AgentManager.ts::resolveUnixShell",
+      "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.dispose",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.connect",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.getConnection",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionInfo",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.tapStream",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.removeConnection",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager",
+      "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.dispose",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.forget",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.setTitle",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.get",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.setFirstPromptIfMissing",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.enforceCap",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.persist",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::PersistedSessionEntry",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.dispose",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.touch",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.forgetAgent",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.reconcileFromAgent",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.upsertNew",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.list",
+      "vscode-acp\\src\\core\\SessionHistoryStore.ts::PersistedShape",
+      "vscode-acp\\src\\core\\SessionManager.ts::AgentCapabilitySummary",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setHistoryStore",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectionForAgent",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.runAuthFlow",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionInfo",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.dispose",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getConnectionForSession",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applyConfigOptions",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveAgentName",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.signIn",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.touchHistory",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.isAgentConnected",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.reconnectAgent",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.listLocalSessions",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.cancelTurn",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getCachedCapabilities",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setMode",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.drainPending",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectOrResume",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.resumeSession",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveSession",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.authMethods",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.summarizeCapabilities",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.createAcpSession",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.disconnectAgent",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setConfigOption",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getHistoryStore",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectToAgent",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.driveAuthBrowser",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.listSessions",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applySessionInfoUpdate",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.newConversation",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.findAgentIdForConnection",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applyAvailableCommands",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setModel",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.isLoading",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveSessionId",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.sendPrompt",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.recordFirstPrompt",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.signOut",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getConnectedAgentNames",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.authStatus",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.ensureConnected",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getSession",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getWorkspaceCwd",
+      "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.loadSession",
+      "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.restore",
+      "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.count",
+      "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.begin",
+      "vscode-acp\\src\\core\\checkpoints.ts::checkpoints",
+      "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.snapshot",
+      "vscode-acp\\src\\extension.ts::activate",
+      "vscode-acp\\src\\extension.ts::AinxtInlineProvider",
+      "vscode-acp\\src\\extension.ts::deactivate",
+      "vscode-acp\\src\\extension.ts::AinxtInlineProvider.provideInlineCompletionItems",
+      "vscode-acp\\src\\extension.ts::storedGatewayEmail",
+      "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler",
+      "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler.writeTextFile",
+      "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler.readTextFile",
+      "vscode-acp\\src\\handlers\\PermissionHandler.ts::PermissionHandler",
+      "vscode-acp\\src\\handlers\\PermissionHandler.ts::PermissionHandler.requestPermission",
+      "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.addListener",
+      "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler",
+      "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.handleUpdate",
+      "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.dispose",
+      "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.removeListener",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.waitForTerminalExit",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.killTerminal",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.releaseTerminal",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.terminalOutput",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.dispose",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::ManagedTerminal",
+      "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.createTerminal",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachProblems",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestAskInWebview",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::getNonce",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.ensureDiffProvider",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachGit",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestPlanApprovalInWebview",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleCancelTurn",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyLoadSessionStart",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.clearChat",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.getHtmlContent",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSessionUpdate",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.hasChatContent",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyConfigOptionsUpdate",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.postMessage",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachByPath",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.loadProjectRules",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyAuthState",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyModelsUpdate",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.refreshBudget",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestPermissionInWebview",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetMode",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifySessionInfoUpdate",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.renderMarkdown",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyLoadSessionEnd",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetConfigOption",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyModesUpdate",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.sendWorkspaceFiles",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.resolveWebviewView",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSendPrompt",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.escapeHtml",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyActiveSessionChanged",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.dispose",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.sendCurrentState",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachFolder",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetModel",
+      "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachFile",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.loadMore",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getChildren",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.fetchSessionList",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getTreeItem",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentChildren",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.computeCollapsibleState",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.loadingLeaf",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getLocalSourcedChildren",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::AgentTreeItem",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeItem",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::InfoTreeItem",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentNodes",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::AgentListState",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.dispose",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::relativeTime",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.authRequiredLeaf",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.buildAgentSessionItem",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::shortSessionId",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentSourcedChildren",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.refresh",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.probeCapabilities",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::buildSessionTooltip",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.buildLocalSessionItem",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::truncate",
+      "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider",
+      "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager",
+      "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager.dispose",
+      "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager.updateStatus",
+      "vscode-acp\\src\\ui\\askBridge.ts::askBridge.setUi",
+      "vscode-acp\\src\\ui\\askBridge.ts::askBridge",
+      "vscode-acp\\src\\ui\\askBridge.ts::askBridge.request",
+      "vscode-acp\\src\\ui\\askBridge.ts::AskParams",
+      "vscode-acp\\src\\ui\\askBridge.ts::askBridge.hasUi",
+      "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.setUi",
+      "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.hasUi",
+      "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.request",
+      "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge",
+      "vscode-acp\\src\\ui\\planBridge.ts::planBridge.request",
+      "vscode-acp\\src\\ui\\planBridge.ts::planBridge.setUi",
+      "vscode-acp\\src\\ui\\planBridge.ts::planBridge",
+      "vscode-acp\\src\\ui\\planBridge.ts::planBridge.hasUi",
+      "vscode-acp\\src\\ui\\planBridge.ts::PlanParams",
+      "vscode-acp\\src\\utils\\Logger.ts::log",
+      "vscode-acp\\src\\utils\\Logger.ts::getTrafficChannel",
+      "vscode-acp\\src\\utils\\Logger.ts::disposeChannels",
+      "vscode-acp\\src\\utils\\Logger.ts::getOutputChannel",
+      "vscode-acp\\src\\utils\\Logger.ts::logTraffic",
+      "vscode-acp\\src\\utils\\StreamAdapter.ts::childProcessToWebStreams",
+      "vscode-acp\\src\\utils\\StreamAdapter.ts::AcpStream",
+      "vscode-acp\\src\\utils\\TelemetryManager.ts::getCommonProperties",
+      "vscode-acp\\src\\utils\\TelemetryManager.ts::sendEvent",
+      "vscode-acp\\src\\utils\\TelemetryManager.ts::initTelemetry",
+      "vscode-acp\\webview-ui\\src\\App.tsx::App",
+      "vscode-acp\\webview-ui\\src\\App.tsx::DiffView",
+      "vscode-acp\\webview-ui\\src\\App.tsx::num",
+      "vscode-acp\\webview-ui\\src\\App.tsx::diffsOf",
+      "vscode-acp\\webview-ui\\src\\App.tsx::langOf",
+      "vscode-acp\\webview-ui\\src\\App.tsx::contextWindowOf",
+      "vscode-acp\\webview-ui\\src\\App.tsx::uid",
+      "vscode-acp\\webview-ui\\src\\App.tsx::lineDiff",
+      "vscode-acp\\webview-ui\\src\\App.tsx::hlLine",
+      "vscode-acp\\webview-ui\\src\\App.tsx::fmtK",
+      "vscode-acp\\webview-ui\\src\\App.tsx::buildDiffRows",
+      "vscode-acp\\webview-ui\\src\\App.tsx::escapeHtml",
+      "vscode-acp\\webview-ui\\src\\App.tsx::textOf",
+      "vscode-acp\\webview-ui\\src\\Markdown.tsx::extractText",
+      "vscode-acp\\webview-ui\\src\\Markdown.tsx::CodeBlock",
+      "vscode-acp\\webview-ui\\src\\Markdown.tsx::Markdown",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::normalizeModels",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::onHost",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::HostMessage",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::SessionState",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::Window",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::post",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::AcpUpdate",
+      "vscode-acp\\webview-ui\\src\\bridge.ts::AskQuestion",
+      "vscode-acp\\webview-ui\\vite.config.ts::defineConfig"
+    ],
+    "children": {
+      "agent_management": {
+        "components": [
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.writeTextFile",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.extMethod",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.terminalOutput",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.readTextFile",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.extNotification",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.getAgent",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.killTerminal",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.waitForTerminalExit",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.createTerminal",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.releaseTerminal",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.sessionUpdate",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.setAgent",
+          "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.requestPermission",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.killAll",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.killAgent",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.getAgent",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.spawnAgent",
+          "vscode-acp\\src\\core\\AgentManager.ts::shellEscape",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.getRunningAgents",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentInstance",
+          "vscode-acp\\src\\core\\AgentManager.ts::resolveUnixShell",
+          "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.dispose",
+          "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.restore",
+          "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.count",
+          "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.begin",
+          "vscode-acp\\src\\core\\checkpoints.ts::checkpoints",
+          "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.snapshot"
+        ],
+        "children": {
+          "agent_management_acp_client": {
+            "components": [
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.setAgent",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.getAgent",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.requestPermission",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.sessionUpdate",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.writeTextFile",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.readTextFile",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.createTerminal",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.terminalOutput",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.waitForTerminalExit",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.killTerminal",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.releaseTerminal",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.extMethod",
+              "vscode-acp\\src\\core\\AcpClientImpl.ts::AcpClientImpl.extNotification"
+            ],
+            "children": {}
+          },
+          "agent_management_agent_lifecycle": {
+            "components": [
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentInstance",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.spawnAgent",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.killAgent",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.getAgent",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.getRunningAgents",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.killAll",
+              "vscode-acp\\src\\core\\AgentManager.ts::AgentManager.dispose",
+              "vscode-acp\\src\\core\\AgentManager.ts::shellEscape",
+              "vscode-acp\\src\\core\\AgentManager.ts::resolveUnixShell"
+            ],
+            "children": {}
+          },
+          "agent_management_checkpoints": {
+            "components": [
+              "vscode-acp\\src\\core\\checkpoints.ts::checkpoints",
+              "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.begin",
+              "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.snapshot",
+              "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.count",
+              "vscode-acp\\src\\core\\checkpoints.ts::checkpoints.restore"
+            ],
+            "children": {}
+          }
+        }
+      },
+      "session_management": {
+        "components": [
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.connect",
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.getConnection",
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionInfo",
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.tapStream",
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.removeConnection",
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager",
+          "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.dispose",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.forget",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.setTitle",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.get",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.setFirstPromptIfMissing",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.enforceCap",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.persist",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::PersistedSessionEntry",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.dispose",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.touch",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.forgetAgent",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.reconcileFromAgent",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.upsertNew",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.list",
+          "vscode-acp\\src\\core\\SessionHistoryStore.ts::PersistedShape",
+          "vscode-acp\\src\\core\\SessionManager.ts::AgentCapabilitySummary",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setHistoryStore",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectionForAgent",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.runAuthFlow",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionInfo",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.dispose",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getConnectionForSession",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applyConfigOptions",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveAgentName",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.signIn",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.touchHistory",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.isAgentConnected",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.reconnectAgent",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.listLocalSessions",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.cancelTurn",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getCachedCapabilities",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setMode",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.drainPending",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectOrResume",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.resumeSession",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveSession",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.authMethods",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.summarizeCapabilities",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.createAcpSession",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.disconnectAgent",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setConfigOption",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getHistoryStore",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectToAgent",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.driveAuthBrowser",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.listSessions",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applySessionInfoUpdate",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.newConversation",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.findAgentIdForConnection",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applyAvailableCommands",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setModel",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.isLoading",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveSessionId",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.sendPrompt",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.recordFirstPrompt",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.signOut",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getConnectedAgentNames",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.authStatus",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.ensureConnected",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getSession",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getWorkspaceCwd",
+          "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.loadSession"
+        ],
+        "children": {
+          "session_management_connections": {
+            "components": [
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.connect",
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.getConnection",
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionInfo",
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.tapStream",
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.removeConnection",
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager",
+              "vscode-acp\\src\\core\\ConnectionManager.ts::ConnectionManager.dispose"
+            ],
+            "children": {}
+          },
+          "session_management_history": {
+            "components": [
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.forget",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.setTitle",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.get",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.setFirstPromptIfMissing",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.enforceCap",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.persist",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::PersistedSessionEntry",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.dispose",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.touch",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.forgetAgent",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.reconcileFromAgent",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.upsertNew",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::SessionHistoryStore.list",
+              "vscode-acp\\src\\core\\SessionHistoryStore.ts::PersistedShape"
+            ],
+            "children": {}
+          },
+          "session_management_orchestration": {
+            "components": [
+              "vscode-acp\\src\\core\\SessionManager.ts::AgentCapabilitySummary",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setHistoryStore",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectionForAgent",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.runAuthFlow",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionInfo",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.dispose",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getConnectionForSession",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applyConfigOptions",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveAgentName",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.signIn",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.touchHistory",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.isAgentConnected",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.reconnectAgent",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.listLocalSessions",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.cancelTurn",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getCachedCapabilities",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setMode",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.drainPending",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectOrResume",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.resumeSession",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveSession",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.authMethods",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.summarizeCapabilities",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.createAcpSession",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.disconnectAgent",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setConfigOption",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getHistoryStore",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.connectToAgent",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.driveAuthBrowser",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.listSessions",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applySessionInfoUpdate",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.newConversation",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.findAgentIdForConnection",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.applyAvailableCommands",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.setModel",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.isLoading",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getActiveSessionId",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.sendPrompt",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.recordFirstPrompt",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.signOut",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getConnectedAgentNames",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.authStatus",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.ensureConnected",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getSession",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.getWorkspaceCwd",
+              "vscode-acp\\src\\core\\SessionManager.ts::SessionManager.loadSession"
+            ],
+            "children": {}
+          }
+        }
+      },
+      "handlers": {
+        "components": [
+          "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler",
+          "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler.writeTextFile",
+          "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler.readTextFile",
+          "vscode-acp\\src\\handlers\\PermissionHandler.ts::PermissionHandler",
+          "vscode-acp\\src\\handlers\\PermissionHandler.ts::PermissionHandler.requestPermission",
+          "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.addListener",
+          "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler",
+          "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.handleUpdate",
+          "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.dispose",
+          "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.removeListener",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.waitForTerminalExit",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.killTerminal",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.releaseTerminal",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.terminalOutput",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.dispose",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::ManagedTerminal",
+          "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.createTerminal"
+        ],
+        "children": {
+          "handlers_file_system": {
+            "components": [
+              "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler",
+              "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler.readTextFile",
+              "vscode-acp\\src\\handlers\\FileSystemHandler.ts::FileSystemHandler.writeTextFile"
+            ],
+            "children": {}
+          },
+          "handlers_permission": {
+            "components": [
+              "vscode-acp\\src\\handlers\\PermissionHandler.ts::PermissionHandler",
+              "vscode-acp\\src\\handlers\\PermissionHandler.ts::PermissionHandler.requestPermission"
+            ],
+            "children": {}
+          },
+          "handlers_session_update": {
+            "components": [
+              "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler",
+              "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.addListener",
+              "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.handleUpdate",
+              "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.dispose",
+              "vscode-acp\\src\\handlers\\SessionUpdateHandler.ts::SessionUpdateHandler.removeListener"
+            ],
+            "children": {}
+          },
+          "handlers_terminal": {
+            "components": [
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.createTerminal",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.terminalOutput",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.waitForTerminalExit",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.killTerminal",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.releaseTerminal",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::TerminalHandler.dispose",
+              "vscode-acp\\src\\handlers\\TerminalHandler.ts::ManagedTerminal"
+            ],
+            "children": {}
+          }
+        }
+      },
+      "extension_ui": {
+        "components": [
+          "vscode-acp\\src\\extension.ts::activate",
+          "vscode-acp\\src\\extension.ts::AinxtInlineProvider",
+          "vscode-acp\\src\\extension.ts::deactivate",
+          "vscode-acp\\src\\extension.ts::AinxtInlineProvider.provideInlineCompletionItems",
+          "vscode-acp\\src\\extension.ts::storedGatewayEmail",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachProblems",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestAskInWebview",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::getNonce",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.ensureDiffProvider",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachGit",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestPlanApprovalInWebview",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleCancelTurn",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyLoadSessionStart",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.clearChat",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.getHtmlContent",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSessionUpdate",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.hasChatContent",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyConfigOptionsUpdate",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.postMessage",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachByPath",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.loadProjectRules",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyAuthState",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyModelsUpdate",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.refreshBudget",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestPermissionInWebview",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetMode",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifySessionInfoUpdate",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.renderMarkdown",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyLoadSessionEnd",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetConfigOption",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyModesUpdate",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.sendWorkspaceFiles",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.resolveWebviewView",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSendPrompt",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.escapeHtml",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyActiveSessionChanged",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.dispose",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.sendCurrentState",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachFolder",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetModel",
+          "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachFile",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.loadMore",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getChildren",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.fetchSessionList",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getTreeItem",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentChildren",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.computeCollapsibleState",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.loadingLeaf",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getLocalSourcedChildren",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::AgentTreeItem",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeItem",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::InfoTreeItem",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentNodes",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::AgentListState",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.dispose",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::relativeTime",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.authRequiredLeaf",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.buildAgentSessionItem",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::shortSessionId",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentSourcedChildren",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.refresh",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.probeCapabilities",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::buildSessionTooltip",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.buildLocalSessionItem",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::truncate",
+          "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider",
+          "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager",
+          "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager.dispose",
+          "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager.updateStatus",
+          "vscode-acp\\src\\ui\\askBridge.ts::askBridge.setUi",
+          "vscode-acp\\src\\ui\\askBridge.ts::askBridge",
+          "vscode-acp\\src\\ui\\askBridge.ts::askBridge.request",
+          "vscode-acp\\src\\ui\\askBridge.ts::AskParams",
+          "vscode-acp\\src\\ui\\askBridge.ts::askBridge.hasUi",
+          "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.setUi",
+          "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.hasUi",
+          "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.request",
+          "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge",
+          "vscode-acp\\src\\ui\\planBridge.ts::planBridge.request",
+          "vscode-acp\\src\\ui\\planBridge.ts::planBridge.setUi",
+          "vscode-acp\\src\\ui\\planBridge.ts::planBridge",
+          "vscode-acp\\src\\ui\\planBridge.ts::planBridge.hasUi",
+          "vscode-acp\\src\\ui\\planBridge.ts::PlanParams"
+        ],
+        "children": {
+          "extension_activation": {
+            "components": [
+              "vscode-acp\\src\\extension.ts::activate",
+              "vscode-acp\\src\\extension.ts::AinxtInlineProvider",
+              "vscode-acp\\src\\extension.ts::deactivate",
+              "vscode-acp\\src\\extension.ts::AinxtInlineProvider.provideInlineCompletionItems",
+              "vscode-acp\\src\\extension.ts::storedGatewayEmail"
+            ],
+            "children": {}
+          },
+          "chat_webview": {
+            "components": [
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachProblems",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestAskInWebview",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::getNonce",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.ensureDiffProvider",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachGit",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestPlanApprovalInWebview",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleCancelTurn",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyLoadSessionStart",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.clearChat",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.getHtmlContent",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSessionUpdate",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.hasChatContent",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyConfigOptionsUpdate",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.postMessage",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachByPath",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.loadProjectRules",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyAuthState",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyModelsUpdate",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.refreshBudget",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.requestPermissionInWebview",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetMode",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifySessionInfoUpdate",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.renderMarkdown",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyLoadSessionEnd",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetConfigOption",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyModesUpdate",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.sendWorkspaceFiles",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.resolveWebviewView",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSendPrompt",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.escapeHtml",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.notifyActiveSessionChanged",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.dispose",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.sendCurrentState",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachFolder",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.handleSetModel",
+              "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider.attachFile",
+              "vscode-acp\\src\\ui\\askBridge.ts::askBridge.setUi",
+              "vscode-acp\\src\\ui\\askBridge.ts::askBridge",
+              "vscode-acp\\src\\ui\\askBridge.ts::askBridge.request",
+              "vscode-acp\\src\\ui\\askBridge.ts::AskParams",
+              "vscode-acp\\src\\ui\\askBridge.ts::askBridge.hasUi",
+              "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.setUi",
+              "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.hasUi",
+              "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge.request",
+              "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge",
+              "vscode-acp\\src\\ui\\planBridge.ts::planBridge.request",
+              "vscode-acp\\src\\ui\\planBridge.ts::planBridge.setUi",
+              "vscode-acp\\src\\ui\\planBridge.ts::planBridge",
+              "vscode-acp\\src\\ui\\planBridge.ts::planBridge.hasUi",
+              "vscode-acp\\src\\ui\\planBridge.ts::PlanParams"
+            ],
+            "children": {
+              "chat_webview_provider": {
+                "components": [
+                  "vscode-acp\\src\\ui\\ChatWebviewProvider.ts::ChatWebviewProvider"
+                ],
+                "children": {}
+              },
+              "chat_webview_bridges": {
+                "components": [
+                  "vscode-acp\\src\\ui\\askBridge.ts::askBridge",
+                  "vscode-acp\\src\\ui\\permissionBridge.ts::permissionBridge",
+                  "vscode-acp\\src\\ui\\planBridge.ts::planBridge"
+                ],
+                "children": {}
+              }
+            }
+          },
+          "session_tree": {
+            "components": [
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.loadMore",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getChildren",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.fetchSessionList",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getTreeItem",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentChildren",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.computeCollapsibleState",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.loadingLeaf",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getLocalSourcedChildren",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::AgentTreeItem",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeItem",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::InfoTreeItem",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentNodes",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::AgentListState",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.dispose",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::relativeTime",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.authRequiredLeaf",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.buildAgentSessionItem",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::shortSessionId",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.getAgentSourcedChildren",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.refresh",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.probeCapabilities",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::buildSessionTooltip",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider.buildLocalSessionItem",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::truncate",
+              "vscode-acp\\src\\ui\\SessionTreeProvider.ts::SessionTreeProvider"
+            ],
+            "children": {}
+          },
+          "status_bar": {
+            "components": [
+              "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager",
+              "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager.dispose",
+              "vscode-acp\\src\\ui\\StatusBarManager.ts::StatusBarManager.updateStatus"
+            ],
+            "children": {}
+          }
+        }
+      },
+      "webview_ui": {
+        "components": [
+          "vscode-acp\\webview-ui\\src\\App.tsx::App",
+          "vscode-acp\\webview-ui\\src\\App.tsx::DiffView",
+          "vscode-acp\\webview-ui\\src\\App.tsx::num",
+          "vscode-acp\\webview-ui\\src\\App.tsx::diffsOf",
+          "vscode-acp\\webview-ui\\src\\App.tsx::langOf",
+          "vscode-acp\\webview-ui\\src\\App.tsx::contextWindowOf",
+          "vscode-acp\\webview-ui\\src\\App.tsx::uid",
+          "vscode-acp\\webview-ui\\src\\App.tsx::lineDiff",
+          "vscode-acp\\webview-ui\\src\\App.tsx::hlLine",
+          "vscode-acp\\webview-ui\\src\\App.tsx::fmtK",
+          "vscode-acp\\webview-ui\\src\\App.tsx::buildDiffRows",
+          "vscode-acp\\webview-ui\\src\\App.tsx::escapeHtml",
+          "vscode-acp\\webview-ui\\src\\App.tsx::textOf",
+          "vscode-acp\\webview-ui\\src\\Markdown.tsx::extractText",
+          "vscode-acp\\webview-ui\\src\\Markdown.tsx::CodeBlock",
+          "vscode-acp\\webview-ui\\src\\Markdown.tsx::Markdown",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::normalizeModels",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::onHost",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::HostMessage",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::SessionState",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::Window",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::post",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::AcpUpdate",
+          "vscode-acp\\webview-ui\\src\\bridge.ts::AskQuestion",
+          "vscode-acp\\webview-ui\\vite.config.ts::defineConfig"
+        ],
+        "children": {
+          "webview_ui_bridge": {
+            "components": [
+              "vscode-acp\\webview-ui\\src\\bridge.ts::post",
+              "vscode-acp\\webview-ui\\src\\bridge.ts::onHost",
+              "vscode-acp\\webview-ui\\src\\bridge.ts::normalizeModels",
+              "vscode-acp\\webview-ui\\src\\bridge.ts::HostMessage",
+              "vscode-acp\\webview-ui\\src\\bridge.ts::SessionState",
+              "vscode-acp\\webview-ui\\src\\bridge.ts::AcpUpdate",
+              "vscode-acp\\webview-ui\\src\\bridge.ts::AskQuestion"
+            ],
+            "children": {}
+          },
+          "webview_ui_app": {
+            "components": [
+              "vscode-acp\\webview-ui\\src\\App.tsx::App",
+              "vscode-acp\\webview-ui\\src\\App.tsx::DiffView",
+              "vscode-acp\\webview-ui\\src\\App.tsx::buildDiffRows",
+              "vscode-acp\\webview-ui\\src\\App.tsx::lineDiff",
+              "vscode-acp\\webview-ui\\src\\App.tsx::textOf",
+              "vscode-acp\\webview-ui\\src\\App.tsx::diffsOf",
+              "vscode-acp\\webview-ui\\src\\App.tsx::escapeHtml",
+              "vscode-acp\\webview-ui\\src\\App.tsx::hlLine",
+              "vscode-acp\\webview-ui\\src\\App.tsx::langOf",
+              "vscode-acp\\webview-ui\\src\\App.tsx::contextWindowOf",
+              "vscode-acp\\webview-ui\\src\\App.tsx::fmtK",
+              "vscode-acp\\webview-ui\\src\\App.tsx::uid",
+              "vscode-acp\\webview-ui\\src\\App.tsx::num"
+            ],
+            "children": {}
+          },
+          "webview_ui_markdown": {
+            "components": [
+              "vscode-acp\\webview-ui\\src\\Markdown.tsx::Markdown",
+              "vscode-acp\\webview-ui\\src\\Markdown.tsx::CodeBlock",
+              "vscode-acp\\webview-ui\\src\\Markdown.tsx::extractText"
+            ],
+            "children": {}
+          },
+          "webview_ui_build": {
+            "components": [
+              "vscode-acp\\webview-ui\\vite.config.ts::defineConfig"
+            ],
+            "children": {}
+          }
+        }
+      },
+      "config": {
+        "components": [
+          "vscode-acp\\src\\config\\AgentConfig.ts::getAgentNames",
+          "vscode-acp\\src\\config\\AgentConfig.ts::AgentConfigEntry",
+          "vscode-acp\\src\\config\\AgentConfig.ts::setInjectedApiKey",
+          "vscode-acp\\src\\config\\AgentConfig.ts::getAgentConfig",
+          "vscode-acp\\src\\config\\AgentConfig.ts::withModelArg",
+          "vscode-acp\\src\\config\\AgentConfig.ts::getAgentConfigs",
+          "vscode-acp\\src\\config\\RegistryClient.ts::RegistryAgent",
+          "vscode-acp\\src\\config\\RegistryClient.ts::clearRegistryCache",
+          "vscode-acp\\src\\config\\RegistryClient.ts::Registry",
+          "vscode-acp\\src\\config\\RegistryClient.ts::fetchRegistry"
+        ],
+        "children": {}
+      },
+      "utils": {
+        "components": [
+          "vscode-acp\\src\\utils\\Logger.ts::log",
+          "vscode-acp\\src\\utils\\Logger.ts::getTrafficChannel",
+          "vscode-acp\\src\\utils\\Logger.ts::disposeChannels",
+          "vscode-acp\\src\\utils\\Logger.ts::getOutputChannel",
+          "vscode-acp\\src\\utils\\Logger.ts::logTraffic",
+          "vscode-acp\\src\\utils\\StreamAdapter.ts::childProcessToWebStreams",
+          "vscode-acp\\src\\utils\\StreamAdapter.ts::AcpStream",
+          "vscode-acp\\src\\utils\\TelemetryManager.ts::getCommonProperties",
+          "vscode-acp\\src\\utils\\TelemetryManager.ts::sendEvent",
+          "vscode-acp\\src\\utils\\TelemetryManager.ts::initTelemetry"
+        ],
+        "children": {
+          "utils_logging": {
+            "components": [
+              "vscode-acp\\src\\utils\\Logger.ts::log",
+              "vscode-acp\\src\\utils\\Logger.ts::getTrafficChannel",
+              "vscode-acp\\src\\utils\\Logger.ts::disposeChannels",
+              "vscode-acp\\src\\utils\\Logger.ts::getOutputChannel",
+              "vscode-acp\\src\\utils\\Logger.ts::logTraffic"
+            ],
+            "children": {}
+          },
+          "utils_streaming": {
+            "components": [
+              "vscode-acp\\src\\utils\\StreamAdapter.ts::childProcessToWebStreams",
+              "vscode-acp\\src\\utils\\StreamAdapter.ts::AcpStream"
+            ],
+            "children": {}
+          },
+          "utils_telemetry": {
+            "components": [
+              "vscode-acp\\src\\utils\\TelemetryManager.ts::getCommonProperties",
+              "vscode-acp\\src\\utils\\TelemetryManager.ts::sendEvent",
+              "vscode-acp\\src\\utils\\TelemetryManager.ts::initTelemetry"
+            ],
+            "children": {}
+          }
+        }
+      }
+    }
+  }
+};
+        const METADATA = {
+  "generation_info": {
+    "timestamp": "2026-08-18T22:34:04.406434",
+    "main_model": "kimi-k2.7-code",
+    "generator_version": "1.0.1",
+    "repo_path": "",
+    "commit_id": ""
+  },
+  "statistics": {
+    "total_components": 356,
+    "leaf_nodes": 267,
+    "max_depth": 2
+  },
+  "files_generated": [
+    "overview.md",
+    "module_tree.json",
+    "first_module_tree.json",
+    "extension/agent-management/README.md",
+    "extension/agent-management/acp-client.md",
+    "extension/agent-management/agent-lifecycle.md",
+    "extension/agent-management/checkpoints.md",
+    "extension/chat-webview/README.md",
+    "extension/chat-webview/bridges.md",
+    "extension/chat-webview/provider.md",
+    "extension/config.md",
+    "extension/activation.md",
+    "extension/ui.md",
+    "extension/handlers/README.md",
+    "extension/handlers/file-system.md",
+    "extension/handlers/permission.md",
+    "extension/handlers/session-update.md",
+    "extension/handlers/terminal.md",
+    "intellij/README.md",
+    "extension/session-management/README.md",
+    "extension/session-management/connections.md",
+    "extension/session-management/history.md",
+    "extension/session-management/orchestration.md",
+    "extension/session-tree.md",
+    "extension/status-bar.md",
+    "extension/utils/README.md",
+    "extension/utils/logging.md",
+    "extension/utils/streaming.md",
+    "extension/utils/telemetry.md",
+    "extension/README.md",
+    "webview/README.md",
+    "webview/app.md",
+    "webview/bridge.md",
+    "webview/build.md",
+    "webview/markdown.md"
+  ]
+};
+        const DOCS_BASE_PATH = '';
+        
+        // Initialize marked with options
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: true,
+            mangle: false
+        });
+        
+        // Initialize mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#2563eb',
+                primaryTextColor: '#334155',
+                primaryBorderColor: '#e2e8f0',
+                lineColor: '#64748b',
+                secondaryColor: '#f1f5f9',
+                tertiaryColor: '#f8fafc'
+            },
+            flowchart: { htmlLabels: true, curve: 'basis' },
+            sequence: { mirrorActors: true, useMaxWidth: true }
+        });
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (MODULE_TREE) {
+                buildNavigation();
+            }
+            
+            // Load overview by default
+            loadDocument('overview.md');
+        });
+        
+        function buildNavigation() {
+            const nav = document.getElementById('navigation');
+            let html = '';
+            
+            for (const [key, data] of Object.entries(MODULE_TREE)) {
+                html += buildNavItem(key, data, 0);
+            }
+            
+            nav.innerHTML = html;
+            
+            // Add click handlers
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const file = this.getAttribute('data-file');
+                    if (file) {
+                        loadDocument(file);
+                        
+                        // Update active state
+                        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+        }
+        
+        function buildNavItem(key, data, depth) {
+            const indentClass = depth > 0 ? 'nav-subsection' : 'nav-section';
+            const fileName = `${key}.md`;
+            
+            let html = `<div class="${indentClass}">`;
+            
+            if (data.components && data.components.length > 0) {
+                html += `<div class="nav-item" data-file="${fileName}">
+                    ${formatNavTitle(key)}
+                </div>`;
+            } else if (depth === 0) {
+                html += `<h3>${formatNavTitle(key)}</h3>`;
+            } else {
+                html += `<div class="nav-item" data-file="${fileName}">
+                    ${formatNavTitle(key)}
+                </div>`;
+            }
+            
+            if (data.children) {
+                for (const [childKey, childData] of Object.entries(data.children)) {
+                    html += buildNavItem(childKey, childData, depth + 1);
+                }
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function formatNavTitle(key) {
+            return key
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+        
+        async function loadDocument(filename) {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            
+            loading.style.display = 'flex';
+            content.style.display = 'none';
+            
+            try {
+                const docPath = DOCS_BASE_PATH ? `${DOCS_BASE_PATH}/${filename}` : filename;
+                const response = await fetch(docPath);
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${filename}`);
+                }
+                
+                const markdown = await response.text();
+                const html = await renderMarkdown(markdown);
+                
+                content.innerHTML = html;
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                
+                // Render mermaid diagrams
+                await renderMermaidDiagrams();
+                
+                // Add click handlers for internal markdown links
+                setupMarkdownLinks();
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+            } catch (error) {
+                console.error('Error loading document:', error);
+                showError(`Failed to load document: ${filename}`);
+            }
+        }
+        
+        function setupMarkdownLinks() {
+            // Use event delegation to intercept all link clicks in markdown content
+            const content = document.getElementById('content');
+            
+            // Remove any existing listener to avoid duplicates
+            const oldListener = content._markdownLinkListener;
+            if (oldListener) {
+                content.removeEventListener('click', oldListener);
+            }
+            
+            // Create new listener
+            const listener = function(e) {
+                // Find the closest anchor tag
+                const link = e.target.closest('a');
+                if (!link) return;
+                
+                const href = link.getAttribute('href');
+                if (!href) return;
+                
+                // Check if it's a markdown file link (ends with .md or .MD)
+                // Also handle cases with anchors like "file.md#section"
+                const mdMatch = href.match(/([^\/]*\.md(?:#.*)?$)/i);
+                if (mdMatch) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Extract filename without anchor
+                    const fullMatch = mdMatch[1];
+                    const filename = fullMatch.split('#')[0];
+                    
+                    // Load the document
+                    loadDocument(filename);
+                    
+                    // Update active state in sidebar
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        if (item.getAttribute('data-file') === filename) {
+                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                            item.classList.add('active');
+                        }
+                    });
+                }
+            };
+            
+            // Store listener reference for cleanup
+            content._markdownLinkListener = listener;
+            
+            // Attach listener
+            content.addEventListener('click', listener);
+        }
+        
+        async function renderMarkdown(markdown) {
+            // Convert markdown to HTML using marked
+            let html = marked.parse(markdown);
+            
+            // Process mermaid code blocks
+            html = html.replace(
+                /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
+                (match, code) => {
+                    const decodedCode = code
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&amp;/g, '&')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#39;/g, "'");
+                    return `<div class="mermaid">${decodedCode}</div>`;
+                }
+            );
+            
+            return html;
+        }
+        
+        async function renderMermaidDiagrams() {
+            const mermaidElements = document.querySelectorAll('.mermaid');
+            
+            for (let i = 0; i < mermaidElements.length; i++) {
+                const element = mermaidElements[i];
+                const id = `mermaid-${Date.now()}-${i}`;
+                element.id = id;
+                
+                try {
+                    const { svg } = await mermaid.render(id + '-svg', element.textContent);
+                    element.innerHTML = svg;
+                } catch (error) {
+                    console.error('Mermaid rendering error:', error);
+                    element.innerHTML = `<pre>Error rendering diagram:\n${element.textContent}</pre>`;
+                }
+            }
+        }
+        
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            
+            loading.style.display = 'none';
+            content.style.display = 'block';
+            content.innerHTML = `
+                <div class="error">
+                    <h3>⚠️ Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+

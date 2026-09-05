@@ -1,0 +1,104 @@
+# ─── Node / npm ───────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+vscode-acp/webview-ui/package-lock.json
+
+# ─── Build outputs ────────────────────────────────────────────────────────────
+dist/
+out/
+build/
+
+# VS Code extension packages
+*.vsix
+
+# Webview React bundle (built by `npm run build` in webview-ui/)
+vscode-acp/webview-ui/dist/
+
+# ─── IntelliJ / Gradle ────────────────────────────────────────────────────────
+.gradle/
+hosts/intellij/build/
+hosts/intellij/.idea/
+hosts/intellij/.intellijPlatform/
+hosts/intellij/.kotlin/
+*.class
+*.jar
+*.zip
+local.properties
+
+# The Gradle wrapper jar is not a build output — it is the bootstrap mechanism
+# `./gradlew` needs to run at all. Without it committed, a fresh clone cannot
+# build the plugin (no jar to invoke, and no Gradle installed to regenerate
+# one). Force-include it despite the blanket *.jar rule above.
+!hosts/intellij/gradle/wrapper/gradle-wrapper.jar
+
+# ─── Secrets & credentials ────────────────────────────────────────────────────
+.env
+.env.*
+*.env
+credentials.json
+secrets.json
+# Keep .env.example if it ever exists
+!.env.example
+
+# ─── Cryptographic material (never commit keys or certificates) ───────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+
+# ─── OS files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Temp / lock files ────────────────────────────────────────────────────────
+# Excel/Office lock files (e.g. ~$OSS_IDE_Daily_Status_Report.xlsx)
+~$*
+*.tmp
+*.temp
+
+# ─── Editor files ─────────────────────────────────────────────────────────────
+# Keep .vscode/extensions.json (recommended extensions) but ignore personal settings
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/*.code-workspace
+
+# ─── Configuration profiles (personal overrides) ─────────────────────────────
+# Track only the shipped profiles; ignore any personal/local profiles a developer
+# might create (e.g. dev.ainxtprofile.json with a real API key or internal URL).
+# Organisation-specific profiles are deliberately NOT force-included: they belong
+# in the operator's own private configuration, not in the public distribution.
+config/*.ainxtprofile.json
+!config/oss.ainxtprofile.json
+!config/standalone.ainxtprofile.json
+
+# ─── TypeScript ───────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── Test output ──────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ---------------------------------------------------------------------------
+# Release-audit output. Written into the repository by the OSS compliance
+# auditor (`python3 -m ossaudit release --repo .`) and never part of the
+# distribution: it contains this tool's own findings, its SBOMs and its
+# evidence quotes. Publishing it would ship an internal review artefact, and
+# leaving it tracked also means the next audit run scans its own output.
+# ---------------------------------------------------------------------------
+compliance/
+
+# Copies made at package time by `npm run copy:legal` so the .vsix carries the
+# licence and NOTICE (Apache-2.0 s4(a), s4(d)).  The root files are the source
+# of truth; these copies must not drift from them.
+vscode-acp/LICENSE
+vscode-acp/NOTICE

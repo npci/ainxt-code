@@ -1,0 +1,16 @@
+{
+  "name": "ainxt-code",
+  "private": true,
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "AiNxt Code - IDE extensions (VS Code + IntelliJ) over the ainxt-cli ACP agent",
+  "workspaces": [
+    "vscode-acp"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.5"
+  }
+}
