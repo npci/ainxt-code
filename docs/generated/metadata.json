@@ -1,0 +1,53 @@
+{
+    "generation_info": {
+        "timestamp": "2026-08-18T22:34:04.406434",
+        "main_model": "kimi-k2.7-code",
+        "generator_version": "1.0.1",
+        "repo_path": "",
+        "commit_id": "",
+        "note": "Generated from a source checkout by an internal documentation tool that is not part of this repository. repo_path is intentionally blank: it previously recorded an internal build machine path.",
+        "layout_note": "Pages were reorganised into extension/, webview/ and intellij/ after generation; files_generated records their current locations, relative to docs/. A regenerated run emits flat filenames and will need remapping again."
+    },
+    "statistics": {
+        "total_components": 356,
+        "leaf_nodes": 267,
+        "max_depth": 2
+    },
+    "files_generated": [
+        "extension/README.md",
+        "extension/activation.md",
+        "extension/agent-management/README.md",
+        "extension/agent-management/acp-client.md",
+        "extension/agent-management/agent-lifecycle.md",
+        "extension/agent-management/checkpoints.md",
+        "extension/chat-webview/README.md",
+        "extension/chat-webview/bridges.md",
+        "extension/chat-webview/provider.md",
+        "extension/config.md",
+        "extension/handlers/README.md",
+        "extension/handlers/file-system.md",
+        "extension/handlers/permission.md",
+        "extension/handlers/session-update.md",
+        "extension/handlers/terminal.md",
+        "extension/session-management/README.md",
+        "extension/session-management/connections.md",
+        "extension/session-management/history.md",
+        "extension/session-management/orchestration.md",
+        "extension/session-tree.md",
+        "extension/status-bar.md",
+        "extension/ui.md",
+        "extension/utils/README.md",
+        "extension/utils/logging.md",
+        "extension/utils/streaming.md",
+        "extension/utils/telemetry.md",
+        "first_module_tree.json",
+        "intellij/README.md",
+        "module_tree.json",
+        "overview.md",
+        "webview/README.md",
+        "webview/app.md",
+        "webview/bridge.md",
+        "webview/build.md",
+        "webview/markdown.md"
+    ]
+}

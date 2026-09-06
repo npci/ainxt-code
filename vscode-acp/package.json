@@ -1,0 +1,421 @@
+{
+  "name": "ainxt-vscode",
+  "displayName": "AiNxt",
+  "description": "AiNxt — governed AI coding agent for VS Code. A thin client over the AiNxt CLI (ACP); all policy/egress/exec guardrails and approvals are enforced by the agent.",
+  "version": "1.0.0",
+  "publisher": "AiNxt",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "bugs": {
+    "url": "https://github.com/npci/ainxt-code/issues"
+  },
+  "homepage": "https://github.com/npci/ainxt-code",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npci/ainxt-code.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "keywords": [
+    "acp",
+    "agent",
+    "ai",
+    "coding agent"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "acp-client",
+          "title": "AiNxt",
+          "icon": "resources/icon-activity.png"
+        }
+      ]
+    },
+    "views": {
+      "acp-client": [
+        {
+          "id": "acp-sessions",
+          "name": "Agents",
+          "type": "tree",
+          "when": "false"
+        },
+        {
+          "id": "acp-chat",
+          "name": "AiNxt",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "acp-chat",
+        "contents": "Start chatting with AiNxt.\n[Connect to AiNxt](command:acp.connectAgent)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "acp.connectAgent",
+        "title": "AiNxt: Connect to Agent",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "acp.newConversation",
+        "title": "AiNxt: New Conversation",
+        "icon": "$(add)"
+      },
+      {
+        "command": "acp.sendPrompt",
+        "title": "AiNxt: Send Prompt"
+      },
+      {
+        "command": "acp.cancelTurn",
+        "title": "AiNxt: Cancel Current Turn",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "acp.disconnectAgent",
+        "title": "AiNxt: Disconnect Agent",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "acp.openChat",
+        "title": "AiNxt: Open Chat Panel"
+      },
+      {
+        "command": "acp.addAgent",
+        "title": "AiNxt: Add Agent Configuration",
+        "icon": "$(add)"
+      },
+      {
+        "command": "acp.removeAgent",
+        "title": "AiNxt: Remove Agent"
+      },
+      {
+        "command": "acp.showLog",
+        "title": "AiNxt: Show Log"
+      },
+      {
+        "command": "acp.showTraffic",
+        "title": "AiNxt: Show Protocol Traffic"
+      },
+      {
+        "command": "acp.setMode",
+        "title": "AiNxt: Set Agent Mode"
+      },
+      {
+        "command": "acp.setModel",
+        "title": "AiNxt: Set Agent Model"
+      },
+      {
+        "command": "acp.attachFile",
+        "title": "AiNxt: Attach File to Prompt",
+        "icon": "$(attach)"
+      },
+      {
+        "command": "acp.refreshAgents",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "acp.refreshSessions",
+        "title": "AiNxt: Refresh Sessions"
+      },
+      {
+        "command": "acp.openSession",
+        "title": "AiNxt: Open Session"
+      },
+      {
+        "command": "acp.loadMoreSessions",
+        "title": "AiNxt: Load More Sessions"
+      },
+      {
+        "command": "acp.copySessionId",
+        "title": "Copy Session ID"
+      },
+      {
+        "command": "acp.forgetSession",
+        "title": "Forget Session"
+      },
+      {
+        "command": "acp.restartAgent",
+        "title": "AiNxt: Restart Agent",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "ainxt.signIn",
+        "title": "AiNxt: Sign In"
+      },
+      {
+        "command": "ainxt.signOut",
+        "title": "AiNxt: Sign Out"
+      },
+      {
+        "command": "ainxt.loadProfile",
+        "title": "AiNxt: Load Configuration Profile",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "acp.openSession",
+          "when": "false"
+        },
+        {
+          "command": "acp.loadMoreSessions",
+          "when": "false"
+        },
+        {
+          "command": "acp.copySessionId",
+          "when": "false"
+        },
+        {
+          "command": "acp.forgetSession",
+          "when": "false"
+        },
+        {
+          "command": "acp.connectAgent",
+          "when": "false"
+        },
+        {
+          "command": "acp.addAgent",
+          "when": "false"
+        },
+        {
+          "command": "acp.removeAgent",
+          "when": "false"
+        },
+        {
+          "command": "acp.refreshAgents",
+          "when": "false"
+        },
+        {
+          "command": "acp.refreshSessions",
+          "when": "false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "acp.addAgent",
+          "when": "view == acp-sessions",
+          "group": "navigation@1"
+        },
+        {
+          "command": "acp.refreshAgents",
+          "when": "view == acp-sessions",
+          "group": "navigation@2"
+        },
+        {
+          "command": "acp.newConversation",
+          "when": "view == acp-chat",
+          "group": "navigation@1"
+        },
+        {
+          "command": "acp.attachFile",
+          "when": "view == acp-chat",
+          "group": "navigation@2"
+        },
+        {
+          "command": "acp.cancelTurn",
+          "when": "view == acp-chat && acp.turnInProgress",
+          "group": "navigation@3"
+        },
+        {
+          "command": "acp.disconnectAgent",
+          "when": "view == acp-chat",
+          "group": "navigation@4"
+        },
+        {
+          "command": "acp.showLog",
+          "when": "view == acp-chat"
+        },
+        {
+          "command": "acp.showTraffic",
+          "when": "view == acp-chat"
+        },
+        {
+          "command": "acp.restartAgent",
+          "when": "view == acp-chat"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "acp.connectAgent",
+          "when": "view == acp-sessions && viewItem == agent-disconnected",
+          "group": "inline"
+        },
+        {
+          "command": "acp.disconnectAgent",
+          "when": "view == acp-sessions && viewItem == agent-connected",
+          "group": "inline"
+        },
+        {
+          "command": "acp.removeAgent",
+          "when": "view == acp-sessions && viewItem =~ /^agent/"
+        },
+        {
+          "command": "acp.restartAgent",
+          "when": "view == acp-sessions && viewItem == agent-connected"
+        },
+        {
+          "command": "acp.refreshSessions",
+          "when": "view == acp-sessions && viewItem =~ /^agent/",
+          "group": "session@1"
+        },
+        {
+          "command": "acp.copySessionId",
+          "when": "view == acp-sessions && viewItem =~ /^session/",
+          "group": "session@1"
+        },
+        {
+          "command": "acp.forgetSession",
+          "when": "view == acp-sessions && viewItem == session-local",
+          "group": "session@2"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "acp.openChat",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a"
+      },
+      {
+        "command": "acp.cancelTurn",
+        "key": "escape",
+        "when": "acp.turnInProgress"
+      }
+    ],
+    "configuration": {
+      "title": "AiNxt",
+      "properties": {
+        "acp.agents": {
+          "type": "object",
+          "description": "The AiNxt agent configuration (spawns the governed AiNxt CLI over ACP). The ainxt.gatewayUrl, ainxt.model, ainxt.binaryPath, and ainxt.homeDir settings override the values here.",
+          "default": {
+            "AiNxt": {
+              "command": "ainxt",
+              "args": [
+                "agent",
+                "--no-leader",
+                "stdio"
+              ],
+              "env": {}
+            }
+          },
+          "scope": "machine"
+        },
+        "acp.autoApprovePermissions": {
+          "type": "string",
+          "enum": [
+            "ask",
+            "allowAll"
+          ],
+          "default": "ask",
+          "description": "Automatically approve agent permission requests. 'ask' always prompts (recommended). 'allowAll' approves everything without prompting — only use in trusted environments.",
+          "scope": "machine"
+        },
+        "acp.defaultWorkingDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Default working directory for agent sessions. Leave empty to use the current workspace folder. Can also be set via the AINXT_CWD environment variable."
+        },
+        "acp.logTraffic": {
+          "type": "boolean",
+          "default": false,
+          "description": "Log all ACP protocol traffic to the output channel. Off by default — enable only for debugging, as it logs all prompts and file contents."
+        },
+        "ainxt.gatewayUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Optional AiNxt Platform gateway URL, for teams that run the shared `ainxt-enterprise` service (auth, budgets, policy, audit). Leave empty to run the `ainxt` CLI standalone — it talks directly to whatever model you configure in `~/.ainxt/config.toml` or via an API key, with no gateway involved. Can also be set via the `AINXT_GATEWAY_URL` environment variable. Set by IT via machine or user settings for shared office-network gateways. Machine-scoped on purpose: a workspace must not be able to redirect where credentials are sent.",
+          "scope": "machine"
+        },
+        "ainxt.binaryPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Full path to the ainxt CLI binary. Leave empty to use 'ainxt' from PATH. Can also be set via the AINXT_BINARY_PATH environment variable. Machine-scoped: it cannot be set by workspace settings, so opening an untrusted folder cannot redirect the agent to a different executable."
+        },
+        "ainxt.homeDir": {
+          "type": "string",
+          "default": "",
+          "description": "AiNxt home directory (where credentials.json lives). Leave empty to use the default (~/.ainxt). Can also be set via the AINXT_HOME environment variable. Useful when ainxt is installed in a non-standard location.",
+          "scope": "machine"
+        },
+        "ainxt.model": {
+          "type": "string",
+          "default": "",
+          "description": "Default model for AiNxt. Leave empty to use the agent's built-in default. Examples: claude-3-5-sonnet (Anthropic), gpt-4o (OpenAI), local:llama3:8b (Ollama). Can also be set via the -m flag in acp.agents args."
+        },
+        "ainxt.allowInsecure": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Allow connecting to a plaintext **http://** or self-signed AiNxt gateway on an internal network. Off by default — enabling relaxes transport security (`AINXT_ALLOW_INSECURE=1`). Only enable for trusted office endpoints.",
+          "scope": "machine"
+        },
+        "ainxt.autocomplete": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable inline ghost-text autocomplete backed by the gateway's `/complete` endpoint. Off by default.\n\n⚠️ **Privacy notice:** When enabled, up to 8,000 characters of the current file are sent to your configured gateway on each keystroke (debounced). Ensure your gateway is trusted and uses **HTTPS** for non-localhost connections. The extension does not control where the gateway forwards requests."
+        },
+        "ainxt.registryUrl": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "URL of the ACP agent registry JSON. Leave empty to use the default public registry (cdn.agentclientprotocol.com). Set to an internal URL if your organisation hosts a private registry mirror. Must be https:// (or a loopback mirror); a plain http:// remote URL is ignored. Machine-scoped: it cannot be set by workspace settings, so opening an untrusted folder cannot redirect the registry fetch. Note: the registry URL receives your IP address when browsed."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build:webview": "cd webview-ui && npm install && npm run build",
+    "compile": "webpack",
+    "compile-tests": "tsc -p . --outDir out",
+    "copy:legal": "node -e \"const fs=require('fs'),path=require('path');for(const f of ['LICENSE','NOTICE','THIRD-PARTY-NOTICES']){const s=path.join(__dirname,'..',f);if(fs.existsSync(s))fs.copyFileSync(s,path.join(__dirname,f));else console.warn('missing '+f+' at repository root');}\"",
+    "copy:profiles": "node -e \"const fs=require('fs'),path=require('path');const src=path.join(__dirname,'../config');const dst=path.join(__dirname,'config');if(!fs.existsSync(src)){console.log('no ../config in this tree; using the profiles already in vscode-acp/config/');process.exit(0)}if(!fs.existsSync(dst))fs.mkdirSync(dst,{recursive:true});fs.readdirSync(src).filter(f=>f.endsWith('.ainxtprofile.json')).forEach(f=>fs.copyFileSync(path.join(src,f),path.join(dst,f)));console.log('Profiles copied to vscode-acp/config/')\"",
+    "lint": "eslint src --max-warnings 0",
+    "package": "npm run copy:profiles && npm run copy:legal && npm run build:webview && npm run package:ext",
+    "package:ext": "webpack --mode production --devtool hidden-source-map",
+    "package:vsix": "npm run package && vsce package --no-dependencies",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "test": "vscode-test",
+    "vscode:prepublish": "npm run copy:profiles && npm run copy:legal && npm run build:webview && npm run package:ext",
+    "watch": "webpack --watch",
+    "watch-tests": "tsc -p . -w --outDir out"
+  },
+  "dependencies": {
+    "@agentclientprotocol/sdk": "^0.21.1",
+    "@vscode/extension-telemetry": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9.0.0",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^5.1.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "AiNxt spawns the ainxt agent as a subprocess and lets it read and write workspace files and run terminal commands. That is not safe to enable for a workspace you have not trusted."
+    }
+  }
+}

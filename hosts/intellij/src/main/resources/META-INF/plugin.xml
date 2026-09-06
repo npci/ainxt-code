@@ -1,0 +1,40 @@
+<idea-plugin>
+    <id>dev.ainxt.ide</id>
+    <name>AiNxt Code</name>
+    <vendor url="https://github.com/npci/ainxt-code">AiNxt Code</vendor>
+    <description><![CDATA[
+        <b>AiNxt Code</b> — governed AI coding agent for JetBrains IDEs (IntelliJ, PyCharm,
+        GoLand, WebStorm…). A JCEF tool window that spawns the governed
+        <code>AiNxt Code</code> CLI over the Agent Client Protocol, so all CLI guardrails
+        (policy engine, egress/exec allowlists, Sovereign approvals, audit) apply.
+        Shares the same UI as the AiNxt VS Code extension.
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <b>0.2.0</b>
+        <ul>
+            <li>Initial OSS release — no organisation-specific defaults; fully configurable via Settings → Tools → AiNxt.</li>
+            <li>IntelliJ Settings panel added (Gateway URL, API Key, Model, Binary Path, Allow Insecure, Load Profile).</li>
+            <li>Configuration profile system — load bundled or your own defaults via the profile picker.</li>
+            <li>File I/O now uses IntelliJ VFS API (reads live editor buffers; writes trigger undo history).</li>
+            <li>Terminal handler added (terminal/execute).</li>
+            <li>clientVersion now read from PluginManagerCore (not hardcoded).</li>
+            <li>AINXT_HOME passed to agent spawn environment.</li>
+        </ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="dev.ainxt.ide.AinxtSettings"/>
+        <toolWindow id="AiNxt" anchor="right"
+                    icon="/icons/toolwindow.png"
+                    factoryClass="dev.ainxt.ide.AinxtToolWindowFactory"/>
+        <notificationGroup id="AiNxt" displayType="BALLOON"/>
+        <!-- Settings → Tools → AiNxt -->
+        <applicationConfigurable parentId="tools"
+                                 instance="dev.ainxt.ide.AinxtConfigurable"
+                                 id="dev.ainxt.ide.AinxtConfigurable"
+                                 displayName="AiNxt"/>
+    </extensions>
+</idea-plugin>

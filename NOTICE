@@ -1,0 +1,254 @@
+AiNxt Code
+Copyright 2026 National Payments Corporation of India
+
+This product includes software and dependencies under the following licenses:
+
+===============================================================================
+APACHE-2.0 LICENSED COMPONENTS
+===============================================================================
+
+Agent Client Protocol TypeScript SDK
+  Repository : https://github.com/agentclientprotocol/typescript-sdk
+  License    : Apache-2.0
+  npm        : @agentclientprotocol/sdk
+
+TypeScript Compiler
+  Repository : https://github.com/microsoft/TypeScript
+  License    : Apache-2.0
+  npm        : typescript
+
+IntelliJ Platform SDK
+  Vendor     : JetBrains s.r.o.
+  Version    : 2025.1 (sinceBuild 233 — compatible with 2023.3 through 2026.x)
+  License    : Apache-2.0
+  Source     : https://github.com/JetBrains/intellij-community
+  NOTICE     : https://github.com/JetBrains/intellij-community/blob/master/NOTICE.TXT
+  Notes      : Platform APIs; resolved from JetBrains Maven repo at build time.
+               Not bundled in the plugin ZIP — provided by the host IDE at runtime.
+
+Gson
+  Vendor     : Google LLC
+  Version    : 2.11.0
+  License    : Apache-2.0
+  Source     : https://github.com/google/gson
+  Notes      : compileOnly — provided by IntelliJ Platform at runtime; not bundled.
+
+Kotlin Standard Library
+  Vendor     : JetBrains s.r.o.
+  Version    : 2.0.21
+  License    : Apache-2.0
+  Source     : https://github.com/JetBrains/kotlin
+  NOTICE     : https://github.com/JetBrains/kotlin/blob/master/license/README.md
+  Notes      : Bundled in the plugin ZIP.
+
+Kotlin Coroutines (kotlinx.coroutines)
+  Vendor     : JetBrains s.r.o.
+  Version    : (transitive of Kotlin 2.0.21)
+  License    : Apache-2.0
+  Source     : https://github.com/Kotlin/kotlinx.coroutines
+  Notes      : Bundled in the plugin ZIP as a transitive dependency.
+
+Gradle Wrapper
+  Vendor     : Gradle Inc.
+  Version    : 8.10
+  License    : Apache-2.0
+  Source     : https://gradle.org
+  Notes      : Build tool only — not redistributed in the plugin ZIP.
+
+org.jetbrains.intellij.platform (Gradle plugin)
+  Vendor     : JetBrains s.r.o.
+  Version    : 2.2.1
+  License    : Apache-2.0
+  Source     : https://github.com/JetBrains/intellij-platform-gradle-plugin
+  Notes      : Build tool only — not redistributed in the plugin ZIP.
+
+===============================================================================
+MIT LICENSED COMPONENTS
+===============================================================================
+
+This product includes software originally developed by Jun Han (formulahendry).
+  Original project : https://github.com/formulahendry/vscode-acp
+  License          : MIT
+  Modifications    : Substantially modified and extended by the AiNxt team.
+                     Original MIT license terms are preserved for derived portions.
+
+marked (Markdown parser)
+  Repository : https://github.com/markedjs/marked
+  License    : MIT
+  npm        : marked
+
+React
+  Repository : https://github.com/facebook/react
+  License    : MIT
+  npm        : react, react-dom
+
+react-markdown
+  Repository : https://github.com/remarkjs/react-markdown
+  License    : MIT
+  npm        : react-markdown
+
+remark-gfm
+  Repository : https://github.com/remarkjs/remark-gfm
+  License    : MIT
+  npm        : remark-gfm
+
+rehype-highlight
+  Repository : https://github.com/rehypejs/rehype-highlight
+  License    : MIT
+  npm        : rehype-highlight
+
+Vite
+  Repository : https://github.com/vitejs/vite
+  License    : MIT
+  npm        : vite
+
+VS Code Extension Telemetry
+  Repository : https://github.com/microsoft/vscode-extension-telemetry
+  License    : MIT
+  npm        : @vscode/extension-telemetry
+
+===============================================================================
+BSD-3-CLAUSE LICENSED COMPONENTS
+===============================================================================
+
+highlight.js
+  Repository : https://github.com/highlightjs/highlight.js
+  License    : BSD-3-Clause
+
+  Copyright (c) 2006, Ivan Sagalaev
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+  * Neither the name of highlight.js nor the names of its contributors may be
+    used to endorse or promote products derived from this software without
+    specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+
+===============================================================================
+VENDORED THIRD-PARTY FILES
+===============================================================================
+
+Third-party code committed into this repository verbatim, as distinct from the npm
+dependencies above. It is recorded here because the generated THIRD-PARTY-NOTICES
+covers only the npm runtime closure of the two shipped bundles and cannot see a
+checked-in file.
+
+Both files below are local copies of the libraries that docs/index.html otherwise
+loads from the jsdelivr CDN, at the same pinned versions.
+
+docs/marked.min.js
+  Upstream   : marked v11.0.0 -- https://github.com/markedjs/marked
+  License    : MIT
+  Modified   : No. Upstream's prebuilt browser distribution, banner intact.
+
+  Copyright (c) 2011-2023, Christopher Jeffrey. (MIT Licensed)
+
+docs/mermaid.min.js
+  Upstream   : mermaid 11.9.0 -- https://github.com/mermaid-js/mermaid
+  License    : MIT
+  Modified   : No. This is mermaid's own prebuilt browser distribution.
+
+  It is a bundle: mermaid's build inlines its runtime dependencies, so this single
+  file carries the code and the licences of all of them. The projects below were
+  confirmed present in this file by inspection. Where a project declares no licence
+  in its npm metadata, the licence published in its own repository is recorded and
+  that source is named, rather than a copyright line being invented.
+
+    ISC
+      d3, d3-sankey                 Copyright 2010-2023 Mike Bostock
+
+    MPL-2.0 OR Apache-2.0
+      dompurify                     Cure53 -- https://github.com/cure53/DOMPurify
+                                    (see the election below)
+
+    MIT
+      katex, marked, stylis, roughjs, dayjs, lodash-es, ts-dedent, cytoscape,
+      cytoscape-fcose, cytoscape-cose-bilkent, dagre-d3-es, @iconify/utils,
+      @mermaid-js/parser, @braintree/sanitize-url
+
+      khroma                        Declares no licence in its npm metadata. MIT is
+                                    published in its repository, Copyright (c)
+                                    2019-present Fabio Spampinato, Andrew Maney --
+                                    https://github.com/fabiospampinato/khroma
+
+  mermaid declares `uuid` as a runtime dependency, but no trace of it was found in
+  this build, so it is not listed here.
+
+  DOMPurify licence election. DOMPurify is offered as "MPL-2.0 OR Apache-2.0" -- a
+  choice the licence itself gives the recipient. This project elects **Apache-2.0**,
+  which is also the licence text DOMPurify's own repository publishes. No MPL-2.0
+  obligation is taken on. The election is recorded here so that a licence scanner
+  reporting "MPL-2.0" against this file can be answered from the file itself.
+
+--------------------------------------------------------------------------------
+TRADEMARKS
+
+Third-party trademarks
+----------------------
+
+This software names other companies' products in order to say what it
+interoperates with, is built on, or can be configured to talk to. Depending on the
+repository, that includes marks such as AWS, Amazon, GitHub, GitLab, Google,
+Microsoft, Azure, Slack, Atlassian/Jira/Confluence, Docker, Kubernetes, OpenAI,
+Anthropic, Claude, Gemini, JetBrains, IntelliJ and Visual Studio Code.
+
+All such marks are the property of their respective owners. They are used here
+**nominatively** -- that is, to identify the third party's own product accurately,
+which is what the law permits without a licence. Their appearance does not imply
+that this project is endorsed by, affiliated with, sponsored by or certified by any
+of those owners, and no such claim is made anywhere in this software or its
+documentation.
+
+Directory and file names that happen to contain a third-party mark (for example a
+`.vscode/` or `.claude/` configuration directory that this software must read) are
+filesystem paths defined by those tools, not a use of the mark as branding.
+
+If you are an owner of one of these marks and consider any usage here incorrect,
+the contact route in SECURITY.md reaches the maintainers.
+
+--------------------------------------------------------------------------------
+
+The MIT Licence is a copyright licence. It grants rights in the software itself and
+says nothing at all about trade names, trademarks, service marks or product names:
+those are governed by trademark law, not by the licence, and no permission to use
+them is granted by it. This section states that position plainly so that adopters do
+not have to infer it from the licence's silence.
+
+"AiNxt", the AiNxt name, and the AiNxt logos and marks -- including any brand
+imagery committed under `vscode-acp/resources/` and `hosts/intellij/src/main/resources/META-INF/` -- identify the origin
+of this software. The copyright grant lets you use and redistribute those files
+as part of this software; it does not give you the right to use the marks as your
+own brand.
+
+You MAY:
+  * redistribute the marks unmodified as part of an unmodified distribution of
+    this software; and
+  * use the name nominatively -- to describe accurately what your software is
+    built on, integrates with, or is derived from.
+
+You MAY NOT, without separate written permission:
+  * use the marks in a way that suggests your fork, product or service is the
+    official one, or is endorsed by or affiliated with this project; or
+  * use the marks as, or as part of, your own product or organisation name.
+
+If you fork this project and distribute it under your own name, replace the brand
+assets with your own. The code is yours to use under the MIT Licence; the marks
+identify whose project it is.

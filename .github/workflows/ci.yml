@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-package:
+    name: Lint, build, test, package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install root/extension dependencies (exact, from lockfile)
+        run: npm ci
+
+      - name: Install webview dependencies (exact, from lockfile)
+        run: npm ci
+        working-directory: vscode-acp/webview-ui
+
+      - name: Release invariants (SETUP-*, DOC-*, FINAL-*)
+        run: bash scripts/check-release-invariants.sh
+
+      - name: Lint
+        run: npm run lint
+        working-directory: vscode-acp
+
+      - name: Compile test harness
+        run: npm run compile-tests
+        working-directory: vscode-acp
+
+      - name: Compile extension
+        run: npm run compile
+        working-directory: vscode-acp
+
+      - name: Build webview bundle
+        run: npm run build
+        working-directory: vscode-acp/webview-ui
+
+      - name: Extension tests (VS Code, headless via xvfb)
+        run: xvfb-run -a npm test
+        working-directory: vscode-acp
+
+      - name: npm audit — extension host (production dependencies)
+        run: npm audit --omit=dev
+
+      - name: npm audit — webview (production dependencies)
+        run: npm audit --omit=dev
+        working-directory: vscode-acp/webview-ui
+
+      - name: THIRD-PARTY-NOTICES is up to date with the installed tree
+        run: node scripts/generate-third-party-notices.mjs --check
+        working-directory: vscode-acp
+
+      - name: Package .vsix
+        run: npm run copy:profiles && npm run copy:legal && npm run package:ext && npx vsce package --no-dependencies
+        working-directory: vscode-acp
+
+      - name: Upload .vsix artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ainxt-vscode-extension
+          path: vscode-acp/*.vsix
+          if-no-files-found: error
+
+  mermaid-render-check:
+    name: Mermaid diagrams render (DOC-021)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      # mermaid and puppeteer are deliberately not repository dependencies (see
+      # scripts/check-mermaid-renders.mjs) — install them into a scratch directory
+      # instead of the tracked node_modules tree.
+      - name: Install mermaid + puppeteer into a scratch directory
+        run: |
+          mkdir -p /tmp/mermaid-scratch
+          cd /tmp/mermaid-scratch
+          npm init -y >/dev/null
+          npm install mermaid puppeteer
+
+      - name: Render every mermaid block in tracked markdown
+        run: node scripts/check-mermaid-renders.mjs --mermaid /tmp/mermaid-scratch/node_modules/mermaid/dist/mermaid.min.js

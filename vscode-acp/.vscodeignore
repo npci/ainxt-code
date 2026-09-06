@@ -1,0 +1,32 @@
+# What actually ships inside the .vsix: dist/ (webpacked extension.js),
+# webview-ui/dist/ (the built React bundle ChatWebviewProvider loads at
+# runtime), resources/, config/, package.json, and the legal files copied in
+# by `npm run copy:legal`. Everything else here is build/dev-only and must be
+# excluded, or the package balloons with source, tooling, and node_modules.
+#
+# Do NOT add a `!**/*.d.ts` (or similar blanket) negation: negations in
+# .vscodeignore are global, so one re-includes node_modules/**/*.d.ts right
+# back in regardless of the exclusion above it (SETUP-043).
+
+.vscodeignore
+.gitignore
+.vscode-test.mjs
+eslint.config.mjs
+tsconfig.json
+webpack.config.js
+
+node_modules/**
+out/**
+src/**
+
+webview-ui/src/**
+webview-ui/node_modules/**
+webview-ui/package.json
+webview-ui/package-lock.json
+webview-ui/tsconfig.json
+webview-ui/vite.config.ts
+webview-ui/index.html
+
+**/*.ts
+**/*.tsbuildinfo
+**/.eslintcache

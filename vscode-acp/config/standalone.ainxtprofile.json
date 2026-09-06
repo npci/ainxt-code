@@ -1,0 +1,15 @@
+{
+  "profile": "standalone",
+  "displayName": "Standalone (no gateway)",
+  "description": "No AiNxt Platform. The ainxt CLI talks directly to a model you configure yourself (Anthropic, OpenAI, Ollama, or any OpenAI-compatible endpoint). Recommended unless your team runs the AiNxt Platform.",
+  "gatewayUrl": "",
+  "model": "",
+  "allowInsecure": false,
+  "binaryPath": "",
+  "notes": [
+    "gatewayUrl is intentionally empty. With no gateway configured, the ainxt CLI reads its model from ~/.ainxt/config.toml ([model.*] entries) or from AINXT_API_KEY / `ainxt login` against your own provider.",
+    "model is intentionally empty: set a default in ~/.ainxt/config.toml ([models].default), or pick one from the model picker once connected.",
+    "Use the Connect button to save an API key — no gateway URL is needed for this profile.",
+    "Switch to the \"Self-hosted gateway\" profile only if your organisation runs the AiNxt Platform (ainxt-enterprise)."
+  ]
+}

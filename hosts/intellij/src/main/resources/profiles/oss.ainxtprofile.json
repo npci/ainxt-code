@@ -1,0 +1,16 @@
+{
+  "profile": "oss",
+  "displayName": "Self-hosted gateway (AiNxt Platform)",
+  "description": "For teams that run their own AiNxt Platform (ainxt-enterprise) for shared auth, budgets, policy and audit. Not required to use AiNxt at all — see the \"Standalone\" profile if you just want the CLI talking directly to a model.",
+  "gatewayUrl": "http://localhost:8000",
+  "model": "",
+  "allowInsecure": false,
+  "binaryPath": "",
+  "notes": [
+    "gatewayUrl points at a local gateway. Change it to wherever yours runs.",
+    "model is intentionally empty: the agent's own default applies, so this profile does not pin you to a provider.",
+    "allowInsecure is false. It relaxes certificate validation for an internally-issued CA; it does NOT permit plain HTTP to a non-loopback host.",
+    "binaryPath is empty, so the `ainxt` binary is resolved from PATH.",
+    "No API key is stored here. Profiles are not secrets - the key lives in the IDE's SecretStorage."
+  ]
+}
