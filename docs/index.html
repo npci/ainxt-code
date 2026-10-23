@@ -1400,6 +1400,7 @@
         // Initialize mermaid
         mermaid.initialize({
             startOnLoad: false,
+            securityLevel: 'strict',
             theme: 'default',
             themeVariables: {
                 primaryColor: '#2563eb',
@@ -1579,13 +1580,10 @@
             html = html.replace(
                 /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
                 (match, code) => {
-                    const decodedCode = code
-                        .replace(/&lt;/g, '<')
-                        .replace(/&gt;/g, '>')
-                        .replace(/&amp;/g, '&')
-                        .replace(/&quot;/g, '"')
-                        .replace(/&#39;/g, "'");
-                    return `<div class="mermaid">${decodedCode}</div>`;
+                    // Keep the code HTML-escaped. The browser decodes entities when
+                    // renderMermaidDiagrams() reads element.textContent, so no manual
+                    // unescaping (and no injection of raw markup) is needed here.
+                    return `<div class="mermaid">${code}</div>`;
                 }
             );
             
@@ -1599,13 +1597,20 @@
                 const element = mermaidElements[i];
                 const id = `mermaid-${Date.now()}-${i}`;
                 element.id = id;
+                // Capture the source up front: on a syntax error mermaid.run() has already
+                // replaced the node's contents with its own error SVG before it throws.
+                const source = element.textContent;
                 
                 try {
-                    const { svg } = await mermaid.render(id + '-svg', element.textContent);
-                    element.innerHTML = svg;
+                    // mermaid.run() reads the (still HTML-escaped) diagram source from the
+                    // node and writes the sanitised SVG back itself (securityLevel: 'strict'),
+                    // so this page never re-parses DOM text as HTML.
+                    await mermaid.run({ nodes: [element] });
                 } catch (error) {
                     console.error('Mermaid rendering error:', error);
-                    element.innerHTML = `<pre>Error rendering diagram:\n${element.textContent}</pre>`;
+                    const pre = document.createElement('pre');
+                    pre.textContent = `Error rendering diagram:\n${source}`;
+                    element.replaceChildren(pre);
                 }
             }
         }
@@ -1616,12 +1621,14 @@
             
             loading.style.display = 'none';
             content.style.display = 'block';
-            content.innerHTML = `
-                <div class="error">
-                    <h3>⚠️ Error</h3>
-                    <p>${message}</p>
-                </div>
-            `;
+            const box = document.createElement('div');
+            box.className = 'error';
+            const title = document.createElement('h3');
+            title.textContent = '⚠️ Error';
+            const text = document.createElement('p');
+            text.textContent = message;
+            box.append(title, text);
+            content.replaceChildren(box);
         }
     </script>
 </body>
